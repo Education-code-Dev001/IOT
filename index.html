@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT คืออะไร? โหมดเรียนรู้แบบอินเทอร์แอกทีฟ (Cyberpunk Edition)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cp-yellow: #fce100;
+            --cp-cyan: #00f0ff;
+            --cp-red: #ff003c;
+            --cp-bg: #090909;
+            --cp-panel: #111111;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: var(--cp-bg);
+            color: #e0e0e0;
+            margin: 0;
+            min-height: 100vh;
+            /* Cyberpunk Grid Background */
+            background-image: 
+                linear-gradient(to right, rgba(0, 240, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center center;
+            overflow-x: hidden;
+        }
+
+        /* Glitch Effect for main title */
+        .glitch-text {
+            position: relative;
+            color: var(--cp-yellow);
+            text-shadow: 2px 2px 0px var(--cp-cyan), -2px -2px 0px var(--cp-red);
+            letter-spacing: 1px;
+        }
+
+        /* Angled Corners (Cyberpunk Style) */
+        .cp-cut {
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
+        }
+        .cp-cut-reverse {
+            clip-path: polygon(20px 0, 100% 0, 100% 100%, 0 100%, 0 20px);
+        }
+        .cp-btn-cut {
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+        }
+
+        /* 3D Flip Card Styles */
+        .flip-card-container {
+            perspective: 1000px;
+            width: 100%;
+            min-height: 410px;
+            margin-bottom: 1.5rem;
+            display: grid;
+        }
+        
+        .flip-card {
+            grid-area: 1 / 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+            cursor: pointer;
+            display: grid;
+        }
+
+        .flip-card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card:not(.flipped):hover .flip-card-front {
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+            border-color: var(--cp-yellow);
+        }
+
+        .flip-card-front, .flip-card-back {
+            grid-area: 1 / 1;
+            width: 100%;
+            min-height: 410px;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            background-color: var(--cp-panel);
+            display: flex;
+            flex-direction: column;
+            border: 2px solid var(--cp-cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+        }
+
+        .flip-card-front {
+            justify-content: center;
+            align-items: center;
+            padding: 2.5rem;
+        }
+
+        .flip-card-back {
+            transform: rotateY(180deg);
+            justify-content: flex-start;
+            align-items: flex-start;
+            border-color: var(--cp-yellow);
+            padding: 1.75rem;
+        }
+
+        /* Custom Content Styles & Cyberpunk Callouts */
+        .highlight { 
+            color: var(--cp-cyan); 
+            font-weight: 700;
+            text-shadow: 0 0 5px rgba(0, 240, 255, 0.4);
+        }
+        .highlight-yellow {
+            color: var(--cp-yellow);
+            font-weight: 700;
+        }
+        .cp-callout {
+            background: rgba(0, 240, 255, 0.05);
+            border-left: 3px solid var(--cp-cyan);
+            padding: 0.85rem 1rem;
+            margin-top: 0.75rem;
+            width: 100%;
+        }
+        .cp-callout-yellow {
+            background: rgba(252, 225, 0, 0.06);
+            border-left: 3px solid var(--cp-yellow);
+            padding: 0.85rem 1rem;
+            margin-top: 0.75rem;
+            width: 100%;
+        }
+        .cp-tag {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 0.15rem 0.5rem;
+            margin-bottom: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        #slideContent ul { 
+            margin-top: 6px; 
+            padding-left: 0; 
+            list-style-type: none;
+        }
+        #slideContent ul > li { 
+            margin-bottom: 8px; 
+            position: relative;
+            padding-left: 18px;
+        }
+        #slideContent ul > li:last-child {
+            margin-bottom: 0;
+        }
+        #slideContent ul > li::before {
+            content: "▸";
+            color: var(--cp-yellow);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        .step-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            background: #181818;
+            border: 1px solid #2a2a2a;
+            padding: 0.75rem;
+            margin-bottom: 0.6rem;
+        }
+        .step-num {
+            background: var(--cp-yellow);
+            color: #000;
+            font-weight: 900;
+            min-width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+        }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.4s ease forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Scrollbar for Cyberpunk Card Back */
+        .flip-card-back::-webkit-scrollbar {
+            width: 6px;
+        }
+        .flip-card-back::-webkit-scrollbar-track {
+            background: #000;
+        }
+        .flip-card-back::-webkit-scrollbar-thumb {
+            background: var(--cp-yellow);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-8">
+
+<div class="w-full max-w-3xl relative z-10 flex flex-col items-center">
+    
+    <!-- Header Area -->
+    <div class="text-center mb-6 fade-in bg-[#111] p-5 border-b-4 border-[#fce100] cp-cut relative w-full">
+        <div class="absolute top-2 left-2 w-2 h-2 bg-[#00f0ff]"></div>
+        <div class="absolute top-2 left-5 w-2 h-2 bg-[#00f0ff]"></div>
+        
+        <h1 class="text-2xl sm:text-3xl font-black mb-3 glitch-text uppercase">
+            ระบบ: เรียนรู้_IoT
+        </h1>
+        <p class="text-black font-bold text-sm sm:text-base bg-[#00f0ff] inline-block px-5 py-1.5 cp-btn-cut uppercase tracking-wider" id="modeTitle">
+            โหมด: ดึงข้อมูลความรู้
+        </p>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="w-full bg-gray-800 h-3 mb-2 border border-gray-700 cp-btn-cut overflow-hidden relative">
+        <div id="progressBar" class="bg-gradient-to-r from-[#00f0ff] to-[#fce100] h-3 w-0 transition-all duration-500 shadow-[0_0_10px_#fce100]"></div>
+    </div>
+    <div class="w-full text-right text-xs text-[#00f0ff] mb-4 font-mono tracking-widest" id="progressText">กำลังโหลดข้อมูล: 0% (0/0)</div>
+
+    <!-- Section: Learning (Interactive Flashcard) -->
+    <div id="learningSection" class="flex flex-col items-center w-full">
+        
+        <!-- Hint for user -->
+        <div id="clickHint" class="text-[#00f0ff] font-mono mb-2 animate-pulse text-sm uppercase tracking-widest">
+            > คลิกเพื่อดูความหมาย <
+        </div>
+
+        <div class="flip-card-container w-full">
+            <div class="flip-card" id="flashcard" onclick="revealCard()">
+                
+                <!-- Front of the card (Icon & Title) -->
+                <div class="flip-card-front cp-cut relative">
+                    <div class="absolute bottom-0 right-0 w-8 h-8 bg-[#00f0ff] cp-cut"></div>
+                    
+                    <div class="mb-4 text-[#fce100] drop-shadow-[0_0_8px_rgba(252,225,0,0.8)]" id="slideIcon">
+                        <!-- Icon will be injected here -->
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-black text-white text-center px-4 leading-tight tracking-wide" id="slideTitleFront">
+                        หัวข้อ
+                    </h2>
+                </div>
+
+                <!-- Back of the card (Content) -->
+                <div class="flip-card-back cp-cut-reverse relative">
+                    <div class="absolute top-0 left-0 w-6 h-6 bg-[#fce100] cp-cut-reverse"></div>
+
+                    <div class="w-full flex justify-between items-center mb-3 pb-2 border-b-2 border-dashed border-gray-700">
+                        <h2 class="text-lg sm:text-xl font-black text-[#fce100] uppercase tracking-wider" id="slideTitleBack">
+                            หัวข้อ
+                        </h2>
+                        <span class="text-xs font-mono text-[#00f0ff] bg-[#00f0ff]/10 px-2 py-0.5 border border-[#00f0ff]/30" id="slideBadge">
+                            DATA 01/06
+                        </span>
+                    </div>
+                    <div id="slideContent" class="text-gray-200 text-sm sm:text-base leading-relaxed w-full text-left flex-1 flex flex-col justify-center">
+                        เนื้อหา
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        
+        <!-- Next Button for Slides -->
+        <div class="w-full flex justify-center mt-2">
+            <button id="nextSlideBtn" onclick="nextSlide(event)" class="hidden w-full sm:w-auto bg-[#fce100] hover:bg-white text-black font-black py-3 px-12 cp-btn-cut transition-colors focus:outline-none text-lg uppercase tracking-widest relative group">
+                <span class="relative z-10">หน้าถัดไป ➔</span>
+                <div class="absolute inset-0 bg-[#ff003c] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300 -z-0 cp-btn-cut"></div>
+                <span class="absolute inset-0 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 pointer-events-none">หน้าถัดไป ➔</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Section: Quiz -->
+    <div id="quizSection" class="hidden flex flex-col items-center w-full fade-in">
+        <div class="bg-[#111] border-l-4 border-r-4 border-[#00f0ff] p-6 sm:p-10 mb-6 w-full min-h-[350px] relative">
+            
+            <h2 class="text-xl sm:text-2xl font-bold text-white mb-6 leading-relaxed border-b border-gray-700 pb-4" id="questionText">คำถาม?</h2>
+            
+            <div class="flex flex-col gap-4 w-full" id="optionsContainer">
+                <!-- Options injected here -->
+            </div>
+            
+            <!-- Feedback Box -->
+            <div id="feedbackText" class="hidden mt-6 p-4 text-lg font-bold w-full text-left transition-all duration-300 border cp-btn-cut"></div>
+        </div>
+
+        <div class="w-full flex justify-center">
+            <button id="nextQuizBtn" onclick="nextQuiz()" class="hidden w-full sm:w-auto bg-[#00f0ff] hover:bg-white text-black font-black py-3 px-12 cp-btn-cut transition-colors focus:outline-none text-lg uppercase tracking-widest">
+                ข้อถัดไป ➔
+            </button>
+        </div>
+    </div>
+
+    <!-- Section: Summary -->
+    <div id="summarySection" class="hidden flex flex-col items-center fade-in w-full">
+        <div class="bg-[#111] border-2 border-[#fce100] p-10 mb-8 w-full text-center min-h-[350px] flex flex-col justify-center items-center cp-cut relative">
+            
+            <div class="absolute top-0 left-0 w-4 h-16 bg-[#fce100]"></div>
+            <div class="absolute bottom-0 right-0 w-16 h-4 bg-[#fce100]"></div>
+
+            <div class="text-4xl sm:text-5xl mb-4 text-[#00f0ff]">สรุปผลคะแนน</div>
+            <h2 class="text-2xl sm:text-3xl font-black text-white mb-2 uppercase">ภารกิจเสร็จสิ้น</h2>
+            <p class="text-gray-400 font-mono mb-6">แบบทดสอบความรู้พื้นฐาน IoT</p>
+            
+            <div class="text-7xl font-black text-[#fce100] mb-6 drop-shadow-[0_0_15px_rgba(252,225,0,0.5)] tracking-tighter" id="finalScore">
+                0 / 0
+            </div>
+            
+            <p id="summaryMessage" class="text-xl font-bold text-[#00f0ff] mb-8 px-4 uppercase"></p>
+            
+            <button onclick="location.reload()" class="bg-[#ff003c] hover:bg-white hover:text-black text-white font-black py-3 px-10 cp-btn-cut transition-all flex items-center gap-3 text-lg uppercase tracking-widest">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                เริ่มต้นระบบใหม่
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- SVG Icons Data ---
+    const iconGlobe = `<svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`;
+    const iconSensor = `<svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+    const iconActuator = `<svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+    const iconSystem = `<svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><rect x="4" y="4" width="16" height="16" rx="0" ry="0"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>`;
+    const iconNetwork = `<svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20" stroke-width="3"></line></svg>`;
+    const iconCloud = `<svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>`;
+
+    const slides = [
+        { 
+            icon: iconGlobe,
+            title: "ภาพรวม - IoT คืออะไร?", 
+            content: `
+                <p class="mb-2">
+                    <span class='highlight'>IoT (Internet of Things)</span> คือการทำให้ <b>"สิ่งของรอบตัว"</b> (เช่น หลอดไฟ พัดลม เครื่องรดน้ำ) เชื่อมต่ออินเทอร์เน็ตได้ เพื่อให้เราสั่งงานผ่านมือถือหรือตั้งให้ทำงานอัตโนมัติ
+                </p>
+                <div class="cp-callout-yellow">
+                    <span class="cp-tag bg-[#fce100] text-black">ตัวอย่างในโรงเรียนไทย</span>
+                    <ul>
+                        <li>ใช้บอร์ดสมองกลราคาประหยัด เช่น <span class="highlight-yellow">KidBright</span> หรือ <span class="highlight-yellow">micro:bit</span></li>
+                        <li>ประยุกต์ทำโครงงานแก้ปัญหาใกล้ตัว เช่น <b>ถังขยะพูดได้</b> หรือ <b>ระบบรดน้ำผักอัตโนมัติ</b></li>
+                    </ul>
+                </div>
+            ` 
+        },
+        { 
+            icon: iconSensor,
+            title: "ส่วนที่ 1 - \"ตาและหู\" (เซนเซอร์)", 
+            content: `
+                <p class="mb-2">
+                    <span class='highlight'>เซนเซอร์ (Sensors)</span> เปรียบเสมือน <b>"ตาและหู"</b> ของระบบ คอยตรวจจับและรับรู้สภาพแวดล้อมรอบตัวเพื่อส่งข้อมูลให้สมองกล
+                </p>
+                <div class="cp-callout">
+                    <span class="cp-tag bg-[#00f0ff] text-black">เซนเซอร์ยอดฮิตสำหรับโครงงาน</span>
+                    <ul>
+                        <li><b>วัดความชื้นในดิน:</b> ปักในกระถางเพื่อเช็กว่าดินแห้งหรือยัง</li>
+                        <li><b>วัดแสงสว่าง:</b> ตรวจสอบว่าตอนนี้มืดหรือสว่างแล้ว</li>
+                        <li><b>วัดฝุ่น PM 2.5:</b> ตรวจจับค่าฝุ่นละอองในอากาศ</li>
+                    </ul>
+                </div>
+            ` 
+        },
+        { 
+            icon: iconActuator,
+            title: "ส่วนที่ 2 - \"มือและเท้า\" (ตัวสั่งการ)", 
+            content: `
+                <p class="mb-2">
+                    <span class='highlight'>ตัวสั่งการ (Actuators)</span> เปรียบเสมือน <b>"มือและเท้า"</b> เมื่อได้รับคำสั่งจากบอร์ดสมองกล มันจะลงมือทำงานทันที!
+                </p>
+                <div class="cp-callout">
+                    <span class="cp-tag bg-[#00f0ff] text-black">อุปกรณ์ลงมือทำที่พบบ่อย</span>
+                    <ul>
+                        <li><b>ปั๊มน้ำจิ๋ว:</b> ทำงานพ่นน้ำรดต้นไม้เมื่อดินแห้ง</li>
+                        <li><b>หลอดไฟ LED:</b> เปิด-ปิดไฟส่องสว่าง หรือกะพริบแจ้งเตือน</li>
+                        <li><b>ลำโพงบัซเซอร์ (Buzzer):</b> ส่งเสียงร้อง "ปี๊บๆ" เตือนภัย</li>
+                    </ul>
+                </div>
+            ` 
+        },
+        { 
+            icon: iconSystem,
+            title: "ตัวอย่างการทำงานร่วมกัน", 
+            content: `
+                <p class="mb-3">จำลองการทำงานของ <span class='highlight'>"ระบบรดน้ำผักอัตโนมัติ"</span> เป็น 3 ขั้นตอนง่ายๆ:</p>
+                <div class="step-box">
+                    <div class="step-num">1</div>
+                    <div><b>เซนเซอร์ (ตา) รับรู้:</b> วัดค่าพบว่า <i>"ดินแห้งแล้ว!"</i> ➔ ส่งข้อมูลไปที่บอร์ด</div>
+                </div>
+                <div class="step-box">
+                    <div class="step-num">2</div>
+                    <div><b>บอร์ด (สมอง) ตัดสินใจ:</b> ประมวลผลตามโค้ดที่เขียน ➔ ส่งคำสั่งเปิดปั๊มน้ำ</div>
+                </div>
+                <div class="step-box mb-0">
+                    <div class="step-num">3</div>
+                    <div><b>ปั๊มน้ำ (มือ) ลงมือทำ:</b> ทำงานพ่นน้ำรดผักให้ชุ่มฉ่ำทันที!</div>
+                </div>
+            ` 
+        },
+        { 
+            icon: iconNetwork,
+            title: "ส่วนที่ 3 - \"เส้นทางสื่อสาร\" (เครือข่าย)", 
+            content: `
+                <p class="mb-2">
+                    อุปกรณ์ต้องมี <b>"ถนน"</b> ให้ข้อมูลวิ่งสื่อสารกัน ซึ่งก็คือเครือข่ายไร้สายอย่าง <span class='highlight'>Wi-Fi</span> หรือ <span class='highlight'>Bluetooth</span>
+                </p>
+                <div class="cp-callout-yellow">
+                    <span class="cp-tag bg-[#fce100] text-black">ปัญหาคลาสสิก & วิธีแก้สุดฮิต</span>
+                    <ul>
+                        <li><b>ปัญหา:</b> Wi-Fi โรงเรียนมักมีระบบล็อกอินซับซ้อน ทำให้บอร์ดเชื่อมต่อไม่ได้</li>
+                        <li><b>ทางออก:</b> ใช้มือถือ <b>"ปล่อย Hotspot"</b> ให้โครงงานเชื่อมต่อแทน ง่ายและเสถียรที่สุด!</li>
+                    </ul>
+                </div>
+            ` 
+        },
+        { 
+            icon: iconCloud,
+            title: "ส่วนที่ 4 - การเก็บข้อมูลและแจ้งเตือน", 
+            content: `
+                <p class="mb-2">
+                    เราสามารถส่งข้อมูลขึ้นอินเทอร์เน็ต (<span class='highlight'>Cloud</span>) เพื่อบันทึกสถิติย้อนหลัง และตั้งค่าให้แจ้งเตือนเข้ามือถือได้แบบเรียลไทม์
+                </p>
+                <div class="cp-callout">
+                    <span class="cp-tag bg-[#00f0ff] text-black">เครื่องมือยอดนิยม</span>
+                    <ul>
+                        <li><b>NETPIE:</b> แพลตฟอร์ม Cloud ฝีมือคนไทย สำหรับเก็บข้อมูลและสร้างกราฟแดชบอร์ด</li>
+                        <li><b>LINE Messaging API:</b> เชื่อมต่อให้บอร์ดทักแชทมาบอกในแอป LINE เช่น <i>"ดินแห้งแล้วนะ กำลังรดน้ำให้จ้า"</i></li>
+                    </ul>
+                </div>
+            ` 
+        }
+    ];
+
+    const quizzes = [
+        {
+            question: "1. สรุปแล้ว IoT (Internet of Things) หมายถึงอะไร?",
+            options: [
+                "การเอาสิ่งของรอบตัวมาต่ออินเทอร์เน็ต เพื่อให้มันฉลาดและสั่งงานได้",
+                "โปรแกรมพิมพ์งานในคอมพิวเตอร์",
+                "เกมออนไลน์บนมือถือ"
+            ],
+            correctIndex: 0,
+            explanation: "IoT คือการทำให้อุปกรณ์ธรรมดาๆ เชื่อมต่ออินเทอร์เน็ตเพื่อสื่อสารกันได้"
+        },
+        {
+            question: "2. ในการทำโครงงาน IoT สิ่งใดที่เปรียบเสมือน \"สมอง\" ที่คอยรับข้อมูลและสั่งการ?",
+            options: [
+                "คีย์บอร์ดและเมาส์",
+                "บอร์ดคอมพิวเตอร์จิ๋ว เช่น KidBright หรือ micro:bit",
+                "หน้าจอสมาร์ตโฟน"
+            ],
+            correctIndex: 1,
+            explanation: "ใช่แล้ว! บอร์ดเหล่านี้คือสมองกลที่เราสามารถเขียนโค้ดใส่เข้าไปเพื่อให้มันคิดและตัดสินใจแทนเราได้"
+        },
+        {
+            question: "3. ถ้าเราเปรียบเทียบ \"เซนเซอร์ (Sensor)\" เป็นอวัยวะของคน จะเหมือนกับส่วนใดมากที่สุด?",
+            options: [
+                "มือและเท้า ที่คอยลงมือทำ",
+                "ตาและหู ที่คอยรับรู้สภาพแวดล้อมรอบตัว",
+                "หัวใจ ที่คอยสูบฉีดเลือด"
+            ],
+            correctIndex: 1,
+            explanation: "เซนเซอร์ทำหน้าที่รับรู้สภาพแวดล้อมเหมือนตาและหูนั่นเอง"
+        },
+        {
+            question: "4. ใน \"โครงงานรดน้ำต้นไม้อัตโนมัติ\" อุปกรณ์ใดทำหน้าที่ลงมือรดน้ำ (Actuator)?",
+            options: [
+                "ปั๊มน้ำจิ๋ว",
+                "เซนเซอร์วัดแสง",
+                "ลำโพงเสียงร้อง"
+            ],
+            correctIndex: 0,
+            explanation: "ปั๊มน้ำจิ๋วจะเป็นตัวรับคำสั่งและลงมือพ่นน้ำออกมาจริงๆ เปรียบเสมือนมือที่คอยรดน้ำให้เรา"
+        },
+        {
+            question: "5. ลำดับการทำงานที่ถูกต้องที่สุดของระบบ IoT คือข้อใด?",
+            options: [
+                "ตัวสั่งการ (ลงมือ) ➔ สมอง (คิด) ➔ เซนเซอร์ (รับรู้)",
+                "เซนเซอร์ (รับรู้) ➔ สมอง (คิด) ➔ ตัวสั่งการ (ลงมือ)",
+                "สมอง (คิด) ➔ ตัวสั่งการ (ลงมือ) ➔ เซนเซอร์ (รับรู้)"
+            ],
+            correctIndex: 1,
+            explanation: "ถูกต้อง! ต้องเริ่มจากเซนเซอร์รับรู้ข้อมูล ส่งไปให้บอร์ดประมวลผล แล้วบอร์ดค่อยสั่งให้ตัวสั่งการทำงาน"
+        },
+        {
+            question: "6. หากโครงงาน \"ระบบรดน้ำอัตโนมัติ\" ทำงานผิดพลาด ปั๊มน้ำทำงานทั้งๆ ที่ดินยังเปียกชุ่มอยู่ นักเรียนควรไปตรวจสอบอุปกรณ์ใดเป็นอันดับแรก?",
+            options: [
+                "ลำโพงบัซเซอร์",
+                "เซนเซอร์วัดความชื้นในดิน",
+                "หลอดไฟ LED"
+            ],
+            correctIndex: 1,
+            explanation: "เซนเซอร์วัดความชื้นในดินอาจจะพังหรืออ่านค่าผิดพลาด ทำให้ส่งข้อมูลไปหลอกสมองว่าดินแห้ง"
+        },
+        {
+            question: "7. หากนักเรียนสร้างเครื่องตรวจวัดฝุ่น PM 2.5 และต้องการให้มี \"เสียงร้องเตือน\" เมื่อฝุ่นเยอะ ควรใช้อุปกรณ์ใด?",
+            options: [
+                "ลำโพงบัซเซอร์",
+                "ปั๊มน้ำจิ๋ว",
+                "เซนเซอร์วัดแสง"
+            ],
+            correctIndex: 0,
+            explanation: "ลำโพงบัซเซอร์คือตัวสั่งการ (Actuator) ที่ใช้สร้างเสียงแจ้งเตือนได้อย่างดีเยี่ยม"
+        },
+        {
+            question: "8. เมื่ออินเทอร์เน็ตของโรงเรียนล็อกรหัสผ่านยุ่งยาก นักเรียนส่วนใหญ่มักแก้ปัญหาเพื่อให้ชิ้นงานต่อเน็ตได้อย่างไร?",
+            options: [
+                "เลิกทำโครงงาน",
+                "ปล่อย Hotspot จากโทรศัพท์มือถือให้ชิ้นงานแทน",
+                "ใช้เครื่องคิดเลขแทน"
+            ],
+            correctIndex: 1,
+            explanation: "เป็นวิธีแก้ปัญหาที่ง่าย นิยมที่สุด และใช้งานได้จริงในการทำโครงงาน"
+        },
+        {
+            question: "9. \"NETPIE\" ที่มักถูกพูดถึงในการทำโครงงาน IoT คืออะไร?",
+            options: [
+                "แอปพลิเคชันสำหรับเล่นเกมออนไลน์",
+                "ระบบฝากและเก็บข้อมูลบนอินเทอร์เน็ต (Cloud) ฝีมือคนไทย",
+                "ยี่ห้อของเซนเซอร์วัดอุณหภูมิ"
+            ],
+            correctIndex: 1,
+            explanation: "NETPIE คือพื้นที่บนคลาวด์ที่ช่วยให้เราเก็บข้อมูลจากเซนเซอร์มาดูย้อนหลังหรือทำกราฟได้"
+        },
+        {
+            question: "10. ถ้าชิ้นงาน IoT ของเราอยากส่งข้อความแจ้งเตือนเข้ามือถือเราทันที นักเรียนไทยนิยมเชื่อมต่อกับแอปพลิเคชันใด?",
+            options: [
+                "YouTube",
+                "เกม Roblox",
+                "LINE (ผ่านระบบ LINE Messaging API)"
+            ],
+            correctIndex: 2,
+            explanation: "LINE Messaging API เป็นตัวช่วยยอดฮิตที่ทำให้โครงงานของเราส่งข้อความทักแชทหาเราในแอป LINE ได้ทันที!"
+        }
+    ];
+
+    let currentSlide = 0;
+    let currentQuiz = 0;
+    let score = 0;
+    let totalSteps = slides.length + quizzes.length;
+    let isRevealed = false;
+    let hasRevealedOnce = false;
+
+    function updateProgress(step) {
+        const percentage = Math.round((step / totalSteps) * 100);
+        document.getElementById('progressBar').style.width = percentage + '%';
+        document.getElementById('progressText').innerText = `กำลังโหลดข้อมูล: ${percentage}% [${step}/${totalSteps}]`;
+    }
+
+    function renderSlide() {
+        if (currentSlide < slides.length) {
+            isRevealed = false;
+            hasRevealedOnce = false;
+            const slide = slides[currentSlide];
+            const flashcard = document.getElementById('flashcard');
+            const hint = document.getElementById('clickHint');
+            
+            flashcard.classList.remove('flipped');
+            
+            hint.innerText = '> คลิกเพื่อดูความหมาย <';
+            hint.classList.remove('opacity-50', 'text-gray-500');
+            hint.classList.add('animate-pulse', 'text-[#00f0ff]');
+            
+            document.getElementById('nextSlideBtn').classList.add('hidden');
+
+            setTimeout(() => {
+                document.getElementById('slideIcon').innerHTML = slide.icon;
+                document.getElementById('slideTitleFront').innerText = slide.title;
+                document.getElementById('slideTitleBack').innerText = slide.title;
+                document.getElementById('slideBadge').innerText = `DATA 0${currentSlide + 1}/0${slides.length}`;
+                document.getElementById('slideContent').innerHTML = slide.content;
+            }, 300);
+            
+            updateProgress(currentSlide + 1);
+        } else {
+            document.getElementById('learningSection').classList.add('hidden');
+            document.getElementById('quizSection').classList.remove('hidden');
+            document.getElementById('modeTitle').innerText = 'โหมด: ทดสอบความเข้าใจ';
+            renderQuiz();
+        }
+    }
+
+    function revealCard() {
+        if (currentSlide < slides.length) {
+            isRevealed = !isRevealed;
+            const flashcard = document.getElementById('flashcard');
+            const hint = document.getElementById('clickHint');
+            
+            if (isRevealed) {
+                flashcard.classList.add('flipped');
+                hint.innerText = '> คลิกเพื่อซ่อนข้อมูล <';
+                hint.classList.remove('animate-pulse', 'text-[#00f0ff]');
+                hint.classList.add('opacity-50', 'text-[#ff003c]');
+                
+                if (!hasRevealedOnce) {
+                    hasRevealedOnce = true;
+                    setTimeout(() => {
+                        document.getElementById('nextSlideBtn').classList.remove('hidden');
+                    }, 600);
+                }
+            } else {
+                flashcard.classList.remove('flipped');
+                hint.innerText = '> คลิกเพื่อดูความหมาย <';
+                hint.classList.add('animate-pulse', 'text-[#00f0ff]');
+                hint.classList.remove('opacity-50', 'text-[#ff003c]');
+            }
+        }
+    }
+
+    function nextSlide(event) {
+        event.stopPropagation();
+        currentSlide++;
+        renderSlide();
+    }
+
+    function renderQuiz() {
+        if (currentQuiz < quizzes.length) {
+            const q = quizzes[currentQuiz];
+            document.getElementById('questionText').innerText = q.question;
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            const feedbackText = document.getElementById('feedbackText');
+            feedbackText.innerText = '';
+            feedbackText.classList.add('hidden');
+            
+            document.getElementById('nextQuizBtn').classList.add('hidden');
+
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full bg-[#0a0a0a] border border-[#333] text-gray-300 text-left px-5 py-4 font-medium focus:outline-none text-lg hover:border-[#00f0ff] hover:text-[#00f0ff] hover:bg-[#00f0ff]/10 transition-all cp-btn-cut';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+            updateProgress(slides.length + currentQuiz + 1);
+        } else {
+            document.getElementById('quizSection').classList.add('hidden');
+            document.getElementById('summarySection').classList.remove('hidden');
+            document.getElementById('modeTitle').innerText = 'โหมด: วิเคราะห์ผลลัพธ์';
+            
+            const finalScoreEl = document.getElementById('finalScore');
+            finalScoreEl.innerText = `${score} / ${quizzes.length}`;
+            
+            const msgEl = document.getElementById('summaryMessage');
+            if(score === quizzes.length) {
+                msgEl.innerText = 'ยอดเยี่ยมมาก! คุณเข้าใจระบบ IoT ได้อย่างทะลุปรุโปร่ง';
+                finalScoreEl.className = "text-7xl font-black text-[#00f0ff] mb-6 drop-shadow-[0_0_15px_rgba(0,240,255,0.8)] tracking-tighter";
+            } else if(score >= quizzes.length / 2) {
+                msgEl.innerText = 'เก่งมาก! เข้าใจหลักการได้ดีเลย';
+                finalScoreEl.className = "text-7xl font-black text-[#fce100] mb-6 drop-shadow-[0_0_15px_rgba(252,225,0,0.8)] tracking-tighter";
+            } else {
+                msgEl.innerText = 'พยายามได้ดี! ลองกลับไปอ่านทบทวนอีกนิดนะ';
+                finalScoreEl.className = "text-7xl font-black text-[#ff003c] mb-6 drop-shadow-[0_0_15px_rgba(255,0,60,0.8)] tracking-tighter";
+            }
+            updateProgress(totalSteps);
+        }
+    }
+
+    function checkAnswer(selectedIndex, btnElement) {
+        const q = quizzes[currentQuiz];
+        const optionsContainer = document.getElementById('optionsContainer');
+        const buttons = optionsContainer.querySelectorAll('button');
+        const feedback = document.getElementById('feedbackText');
+
+        buttons.forEach(btn => {
+            btn.disabled = true;
+            btn.classList.remove('hover:border-[#00f0ff]', 'hover:text-[#00f0ff]', 'hover:bg-[#00f0ff]/10');
+        });
+        feedback.classList.remove('hidden');
+
+        if (selectedIndex === q.correctIndex) {
+            btnElement.classList.remove('bg-[#0a0a0a]', 'border-[#333]', 'text-gray-300');
+            btnElement.classList.add('bg-[#00ff00]', 'border-[#00ff00]', 'text-black', 'font-bold');
+            
+            feedback.innerHTML = `[สำเร็จ] <b>ถูกต้อง!</b><br><span class="text-sm mt-1 font-mono block text-[#00ff00]">${q.explanation}</span>`;
+            feedback.className = 'mt-6 p-4 text-lg font-bold w-full text-left transition-all duration-300 bg-[#00ff00]/10 border border-[#00ff00] text-[#00ff00] cp-btn-cut';
+            score++;
+        } else {
+            btnElement.classList.remove('bg-[#0a0a0a]', 'border-[#333]', 'text-gray-300');
+            btnElement.classList.add('bg-[#ff003c]', 'border-[#ff003c]', 'text-white', 'font-bold');
+            
+            buttons[q.correctIndex].classList.remove('bg-[#0a0a0a]', 'border-[#333]', 'text-gray-300');
+            buttons[q.correctIndex].classList.add('bg-[#00ff00]', 'border-[#00ff00]', 'text-black', 'font-bold');
+            
+            feedback.innerHTML = `[ผิดพลาด] <b>ไม่ถูกต้อง!</b><br><span class="text-sm mt-1 font-mono block text-[#ff003c]">คำตอบที่ถูก: ${q.explanation}</span>`;
+            feedback.className = 'mt-6 p-4 text-lg font-bold w-full text-left transition-all duration-300 bg-[#ff003c]/10 border border-[#ff003c] text-[#ff003c] cp-btn-cut';
+        }
+
+        document.getElementById('nextQuizBtn').classList.remove('hidden');
+    }
+
+    function nextQuiz() {
+        currentQuiz++;
+        renderQuiz();
+    }
+
+    // Initialize
+    renderSlide();
+</script>
+
+</body>
+</html>
